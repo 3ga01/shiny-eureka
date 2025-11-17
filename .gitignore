@@ -36,3 +36,8 @@ build/
 *.env
 !*.example.env
 qodana.sarif.json
+
+### PEM / Keys ###
+*.pem
+*.key
+*.crt
