@@ -1,0 +1,42 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  mvc:
+    servlet:
+      path: ${BASE_PATH:/api}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+sentry:
+  dsn: ${SENTRY_DSN}
+  tracesSampleRate: 1.0
+resilience4j:
+  ratelimiter:
+    instances:
+      userService:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+
+jwt:
+  private-key-path: ${JWT_PRIVATE_KEY}
+  public-key-path: ${JWT_PUBLIC_KEY}
+  expiration-ms: 3600000
+
+
