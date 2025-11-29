@@ -14,6 +14,7 @@ import io.sentry.Sentry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -47,13 +48,9 @@ public class AuthServiceImpl implements AuthService {
     User user = userMapper.toEntity(signUpRequest);
     user.setPassword(passwordEncoder.encode(signUpRequest.password()));
 
-    if (user.getRoles() == null || user.getRoles().isEmpty()) {
-      user.setRoles(Set.of(Role.ROLE_USER));
-    }
+    user.setRoles(Set.of(Role.ROLE_USER));
 
-    if (user.getPermissions() == null || user.getPermissions().isEmpty()) {
-      user.setPermissions(Set.of(Permission.USER_READ));
-    }
+    user.setPermissions(Set.of(Permission.USER_READ));
 
     User saved = userRepository.save(user);
 
@@ -69,15 +66,13 @@ public class AuthServiceImpl implements AuthService {
           new UsernamePasswordAuthenticationToken(
               loginRequest.username(), loginRequest.password()));
     } catch (BadCredentialsException | UsernameNotFoundException ex) {
-      Sentry.captureException(ex);
       throw new AuthenticationFailedException("Invalid username or password");
     }
 
     var user =
         userRepository
             .findByUsernameForUpdate(loginRequest.username())
-            .orElseThrow(
-                () -> new AuthenticationFailedException("User not found after authentication"));
+            .orElseThrow();
 
     String accessToken =
         jwtTokenUtil.generateToken(
@@ -95,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public JwtResponse refreshToken(TokenRefreshRequest refreshToken) {
+  public JwtResponse refreshToken( TokenRefreshRequest refreshToken) {
     String requestToken = refreshToken.refreshToken();
 
     if (!jwtTokenUtil.validateRefreshToken(requestToken)) {

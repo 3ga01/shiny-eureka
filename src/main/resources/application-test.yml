@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false   # disable migrations for simple context load unless using Testcontainers
+  mvc:
+    servlet:
+      path: /api
+
+server:
+  port: 0 # random port for tests
+
+sentry:
+  dsn: ""  # disable
+
+jwt:
+  private-key-path: test-private.key
+  public-key-path: test-public.key
+  expiration-ms: 3600000
+
+cloud:
+  aws:
+    credentials:
+      accessKey: test
+      secretKey: test
+    region:
+      static: us-east-1
+    s3:
+      bucket: test-bucket
+      path-style-access-enabled: true
+      endpoint: http://localhost:9000  # not used in test

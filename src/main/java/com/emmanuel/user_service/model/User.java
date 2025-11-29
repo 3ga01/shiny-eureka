@@ -85,5 +85,9 @@ public class User {
 
   private Instant lastActivityAt;
 
+  private Integer loginCount;
+
+  private Integer failedLoginAttempts;
+
   @Version private Long version;
 }

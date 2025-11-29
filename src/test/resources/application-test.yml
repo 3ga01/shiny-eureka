@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+jwt:
+  private-key-path: credentials/private.pem
+  public-key-path: credentials/public.pem
+  expiration-ms: 3600000
+
+cloud:
+  aws:
+    credentials:
+      accessKey: test
+      secretKey: test
+    region:
+      static: us-east-1
+    s3:
+      bucket: test-bucket
+      endpoint: http://localhost:9000
+      path-style-access-enabled: true

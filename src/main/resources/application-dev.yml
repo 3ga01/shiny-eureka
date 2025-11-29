@@ -39,4 +39,14 @@ jwt:
   public-key-path: ${JWT_PUBLIC_KEY}
   expiration-ms: 3600000
 
-
+cloud:
+  aws:
+    credentials:
+      accessKey: ${MINIO_ACCESS_KEY:minioadmin}
+      secretKey: ${MINIO_SECRET_KEY:minioadmin123}
+    region:
+      static: us-east-1
+    s3:
+      bucket: ${MINIO_BUCKET:user-service}
+      path-style-access-enabled: true
+      endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}

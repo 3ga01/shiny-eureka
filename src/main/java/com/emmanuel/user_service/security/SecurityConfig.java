@@ -35,8 +35,6 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole("ADMIN")
-                    .requestMatchers("/admin/users/create/**")
-                    .hasAuthority("USER_WRITE")
                     .requestMatchers("/user/**")
                     .hasRole("USER")
                     .requestMatchers("/customer/**")
