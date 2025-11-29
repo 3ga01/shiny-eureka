@@ -11,8 +11,8 @@ spring:
     enabled: false
 
 jwt:
-  private-key-path: credentials/private.pem
-  public-key-path: credentials/public.pem
+  private-key-path: private.pem
+  public-key-path: public.pem
   expiration-ms: 3600000
 
 cloud:
