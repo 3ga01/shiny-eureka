@@ -95,11 +95,7 @@ class AuthServiceImplTest {
                 savedUser.getCreatedAt(),
                 savedUser.getUpdatedAt()));
 
-    System.out.println("Saved User: " + savedUser);
-
     CreateUserResponse response = authService.createUser(request);
-
-    System.out.println(response);
 
     assertNotNull(response);
     assertEquals(savedUser.getId(), response.id());
@@ -168,9 +164,6 @@ class AuthServiceImplTest {
 
     JwtResponse jwtResponse = authService.login(loginRequest);
 
-    System.out.println(jwtResponse);
-    System.out.println(savedUser);
-
     assertNotNull(jwtResponse);
     assertEquals("accessToken", jwtResponse.accessToken());
     assertEquals("refreshToken", jwtResponse.refreshToken());
@@ -214,8 +207,6 @@ class AuthServiceImplTest {
         .thenReturn("newAccessToken");
 
     JwtResponse refreshResponse = authService.refreshToken(refreshRequest);
-
-    System.out.println(refreshResponse);
   }
 
   @Test
