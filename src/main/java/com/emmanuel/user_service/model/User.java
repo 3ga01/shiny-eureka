@@ -13,8 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
-@Data
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -85,9 +86,9 @@ public class User {
 
   private Instant lastActivityAt;
 
-  private Integer loginCount;
+  @Builder.Default private Integer loginCount = 0;
 
-  private Integer failedLoginAttempts;
+  @Builder.Default private Integer failedLoginAttempts = 0;
 
   @Version private Long version;
 }
