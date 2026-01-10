@@ -1,5 +1,15 @@
 server:
   port: ${PORT:8080}
+  tomcat:
+    max-swallow-size: 500MB
+    max-http-form-post-size: 500MB
+  connection-timeout: 120000ms  # 2 minutes for large uploads
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+      file-size-threshold: 2KB
+      enabled: true
 
 spring:
   application:
@@ -17,15 +27,22 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+      enabled: true
   mvc:
     servlet:
       path: ${BASE_PATH:/api}
   flyway:
     enabled: true
     baseline-on-migrate: true
+
 sentry:
   dsn: ${SENTRY_DSN}
   tracesSampleRate: 1.0
+
 resilience4j:
   ratelimiter:
     instances:
