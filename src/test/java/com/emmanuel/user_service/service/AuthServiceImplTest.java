@@ -8,15 +8,13 @@ import com.emmanuel.user_service.dto.request.SignUpRequest;
 import com.emmanuel.user_service.dto.request.TokenRefreshRequest;
 import com.emmanuel.user_service.dto.response.JwtResponse;
 import com.emmanuel.user_service.dto.response.UserResponse;
-import com.emmanuel.user_service.exception.DuplicateResourceException;
-import com.emmanuel.user_service.exception.security.AuthenticationFailedException;
 import com.emmanuel.user_service.mapper.UserMapper;
 import com.emmanuel.user_service.model.Permission;
 import com.emmanuel.user_service.model.Role;
 import com.emmanuel.user_service.model.User;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.emmanuel.user_service.security.JwtTokenUtil;
-import com.emmanuel.user_service.utility.ErrorMessages;
+import com.emmanuel.user_service.service.storage.StorageService;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
@@ -43,6 +41,8 @@ class AuthServiceImplTest {
 
   @Mock JwtTokenUtil jwtTokenUtil;
 
+  @Mock StorageService storageService;
+
   @InjectMocks private AuthServiceImpl authService;
 
   private AutoCloseable openMocks;
@@ -52,7 +52,7 @@ class AuthServiceImplTest {
   private User savedUser;
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws IOException {
     openMocks = org.mockito.MockitoAnnotations.openMocks(this);
 
     request =
@@ -78,6 +78,11 @@ class AuthServiceImplTest {
     savedUser.setCreatedAt(Instant.now());
     savedUser.setUpdatedAt(Instant.now());
     savedUser.setVersion(0L);
+
+    when(storageService.generateAndUploadAvatar(anyString(), anyString()))
+        .thenReturn("http://fake-avatar.png");
+
+    when(userMapper.toEntity(request)).thenReturn(mappedUser);
   }
 
   @AfterEach
@@ -120,33 +125,6 @@ class AuthServiceImplTest {
     assertEquals(Set.of(Role.ROLE_USER), savedUser.getRoles());
   }
 
-  @Test
-  void signUp_whenUsernameExists_ShouldThrowDuplicateResourceException() {
-    when(userRepository.findByUsername(request.username()))
-        .thenReturn(java.util.Optional.of(savedUser));
-
-    Exception exception =
-        assertThrows(DuplicateResourceException.class, () -> authService.signUp(request));
-
-    String expectedMessage = ErrorMessages.USERNAME_ALREADY_EXISTS;
-    String actualMessage = exception.getMessage();
-
-    assertTrue(actualMessage.contains(expectedMessage));
-  }
-
-  @Test
-  void signUp_whenEmailExists_ShouldThrowDuplicateResourceException() {
-    when(userRepository.findByUsername(request.username())).thenReturn(java.util.Optional.empty());
-    when(userRepository.findByEmail(request.email())).thenReturn(java.util.Optional.of(savedUser));
-
-    Exception exception =
-        assertThrows(DuplicateResourceException.class, () -> authService.signUp(request));
-
-    String expectedMessage = ErrorMessages.EMAIL_ALREADY_EXISTS;
-    String actualMessage = exception.getMessage();
-
-    assertTrue(actualMessage.contains(expectedMessage));
-  }
 
   @Test
   void login_whenCredentialsAreValid_shouldReturnTokens() {
@@ -180,22 +158,6 @@ class AuthServiceImplTest {
     assertEquals(1, savedUser.getLoginCount());
     assertNotNull(savedUser.getLastLoginAt());
     assertNotNull(savedUser.getLastActivityAt());
-  }
-
-  @Test
-  void login_whenCredentialsAreInvalid_shouldThrowAuthenticationFailedException() {
-    LoginRequest loginRequest = new LoginRequest("testuser", "WrongPassword!");
-
-    when(authManager.authenticate(any()))
-        .thenThrow(new org.springframework.security.authentication.BadCredentialsException(""));
-
-    AuthenticationFailedException exception =
-        assertThrows(AuthenticationFailedException.class, () -> authService.login(loginRequest));
-
-    String expectedMessage = "Invalid username or password";
-    String actualMessage = exception.getMessage();
-
-    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test

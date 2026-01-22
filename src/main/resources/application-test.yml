@@ -35,4 +35,4 @@ cloud:
     s3:
       bucket: test-bucket
       path-style-access-enabled: true
-      endpoint: http://localhost:9000  # not used in test
+      endpoint: http://localhost:7005  # not used in test
