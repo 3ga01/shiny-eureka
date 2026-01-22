@@ -1,4 +1,4 @@
-package com.emmanuel.user_service.dto;
+package com.emmanuel.user_service.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,4 +22,5 @@ public record SignUpRequest(
         String firstName,
     @NotBlank(message = "Last name is required")
         @Size(max = 50, message = "Last name must be at most 50 characters")
-        String lastName) {}
+        String lastName,
+    String logoUrl) {}

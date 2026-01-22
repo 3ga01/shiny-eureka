@@ -3,6 +3,7 @@ package com.emmanuel.user_service.exception.handler;
 import com.emmanuel.user_service.exception.DuplicateResourceException;
 import com.emmanuel.user_service.exception.security.AuthenticationFailedException;
 import com.emmanuel.user_service.utility.ErrorMessages;
+import com.emmanuel.user_service.utility.ErrorTitles;
 import io.sentry.Sentry;
 import java.net.URI;
 import java.util.HashMap;
@@ -25,12 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleAllExceptions(Exception ex) {
-    log.error("Unhandled exception: {}", ex.getMessage(), ex);
-
+    log.error("{}: {}", ErrorTitles.INTERNAL_SERVER_ERROR, ex.getMessage(), ex);
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-    problemDetail.setTitle(ErrorMessages.INTERNAL_SERVER_ERROR);
+    problemDetail.setTitle(ErrorTitles.INTERNAL_SERVER_ERROR);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setType(URI.create("https://example.com/problems/internal-server-error"));
 
@@ -53,11 +53,11 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
   public ProblemDetail handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
-    log.error("Access denied: {}", ex.getMessage(), ex);
+    log.error("{}: {}", ErrorTitles.ACCESS_DENIED, ex.getMessage(), ex);
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
-    problemDetail.setTitle("Access Denied");
+    problemDetail.setTitle(ErrorTitles.ACCESS_DENIED);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setType(URI.create("https://example.com/problems/access-denied"));
 
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex) {
-    log.error("Validation failed: {}", ex.getMessage(), ex);
+    log.error("{}}: {}", ErrorTitles.VALIDATION_FAILED, ex.getMessage(), ex);
     Sentry.captureException(ex);
 
     Map<String, String> errors = new HashMap<>();
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
         .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-    problemDetail.setTitle("Validation Failed");
+    problemDetail.setTitle(ErrorTitles.VALIDATION_FAILED);
     problemDetail.setDetail(errors.toString());
     problemDetail.setType(URI.create("https://example.com/problems/validation-failed"));
 
@@ -85,18 +85,18 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(DuplicateResourceException.class)
   public ProblemDetail handleDuplicateResource(DuplicateResourceException ex) {
     ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-    pd.setTitle("Duplicate Record");
+    pd.setTitle(ErrorTitles.DUPLICATE_RESOURCE);
     pd.setDetail(ex.getMessage());
     return pd;
   }
 
   @ExceptionHandler(UsernameNotFoundException.class)
   public ProblemDetail handleUsernameNotFoundException(UsernameNotFoundException ex) {
-    log.warn("User not found: {}", ex.getMessage());
+    log.warn("{}: {}", ErrorTitles.USER_NOT_FOUND, ex.getMessage());
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-    problemDetail.setTitle("User Not Found");
+    problemDetail.setTitle(ErrorTitles.USER_NOT_FOUND);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setType(URI.create("https://example.com/problems/user-not-found"));
 
@@ -105,12 +105,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(BadCredentialsException.class)
   public ProblemDetail handleBadCredentialsException(BadCredentialsException ex) {
-    log.warn("Authentication failed: {}", ex.getMessage());
+    log.warn("{}: {}", ErrorTitles.AUTH_FAILED, ex.getMessage());
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
-    problemDetail.setTitle("Authentication Failed");
-    problemDetail.setDetail("Invalid username or password");
+    problemDetail.setTitle(ErrorTitles.AUTH_FAILED);
+    problemDetail.setDetail(ErrorMessages.INVALID_CREDENTIALS);
     problemDetail.setType(URI.create("https://example.com/problems/authentication-failed"));
 
     return problemDetail;
@@ -118,11 +118,11 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(AuthenticationFailedException.class)
   public ProblemDetail handleAuthenticationFailed(AuthenticationFailedException ex) {
-    log.warn("Authentication failed: {}", ex.getMessage());
+    log.warn("{}: {}", ErrorTitles.AUTH_FAILED, ex.getMessage());
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
-    problemDetail.setTitle("Authentication Failed");
+    problemDetail.setTitle(ErrorTitles.AUTH_FAILED);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setType(URI.create("https://example.com/problems/authentication-failed"));
 
@@ -131,13 +131,16 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-    log.error("Data integrity violation: {}", ex.getMessage(), ex);
+
+    log.error(ErrorTitles.INVALID_FIELDS, ex);
     Sentry.captureException(ex);
 
+    String detail = resolveDetailMessage(ex);
+
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-    problemDetail.setTitle("Invalid Data");
-    problemDetail.setDetail(
-        "Missing required fields or invalid values. " + ex.getMostSpecificCause().getMessage());
+
+    problemDetail.setTitle(ErrorTitles.INVALID_FIELDS);
+    problemDetail.setDetail(detail);
     problemDetail.setType(URI.create("https://example.com/problems/invalid-data"));
 
     return problemDetail;
@@ -145,14 +148,39 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
   public ProblemDetail handleLockedException(LockedException ex) {
-    log.warn("User account locked: {}", ex.getMessage());
+    log.warn("{}: {}", ErrorTitles.ACCOUNT_LOCKED, ex.getMessage());
     Sentry.captureException(ex);
 
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.LOCKED);
-    problemDetail.setTitle("Account Locked");
-    problemDetail.setDetail("Your account is locked. Please contact support.");
+    problemDetail.setTitle(ErrorTitles.ACCOUNT_LOCKED);
+    problemDetail.setDetail(ErrorMessages.ACCOUNT_LOCKED);
     problemDetail.setType(URI.create("https://example.com/problems/account-locked"));
 
     return problemDetail;
+  }
+
+  private String resolveDetailMessage(DataIntegrityViolationException ex) {
+
+    Throwable cause = ex;
+
+    while (cause != null) {
+
+      if (cause instanceof org.hibernate.exception.ConstraintViolationException cve) {
+
+        String constraint = cve.getConstraintName();
+
+        if ("users_username_key".equals(constraint)) {
+          return ErrorMessages.USERNAME_ALREADY_EXISTS;
+        }
+
+        if ("users_email_key".equals(constraint)) {
+          return ErrorMessages.EMAIL_ALREADY_EXISTS;
+        }
+      }
+
+      cause = cause.getCause();
+    }
+
+    return ErrorMessages.INVALID_FIELDS;
   }
 }

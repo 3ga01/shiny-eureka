@@ -25,4 +25,25 @@ public class ErrorMessages {
   public static final String INVALID_TOKEN = "Invalid token";
   public static final String EXPIRED_TOKEN = "Token has expired";
   public static final String TOKEN_REFRESH_FAILED = "Could not refresh token";
+
+  // Generic Validation Messages
+  public static final String REQUIRED_FIELD = "This field is required";
+  public static final String INVALID_EMAIL = "Invalid email address";
+  public static final String INVALID_PASSWORD = "";
+  public static final String INVALID_USERNAME = "";
+  public static final String INVALID_FIRST_NAME = "";
+  public static final String INVALID_LAST_NAME = "";
+  public static final String INVALID_LOGO_URL = "";
+  public static final String INVALID_ROLE = "";
+  public static final String INVALID_USER_ID = "";
+  public static final String INVALID_DATE = "";
+  public static final String INVALID_DATE_FORMAT = "";
+  public static final String INVALID_PHONE_NUMBER = "";
+  public static final String INVALID_COUNTRY_CODE = "";
+  public static final String INVALID_STATE = "";
+  public static final String INVALID_CITY = "";
+  public static final String INVALID_STREET_ADDRESS = "";
+  public static final String INVALID_ZIP_CODE = "";
+  public static final String INVALID_FIELDS = "Missing required fields or invalid values.";
+  public static final String ACCOUNT_LOCKED = "Your account is locked. Please contact support.";
 }

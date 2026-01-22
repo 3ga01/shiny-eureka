@@ -3,7 +3,11 @@ package com.emmanuel.user_service.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.emmanuel.user_service.dto.*;
+import com.emmanuel.user_service.dto.request.LoginRequest;
+import com.emmanuel.user_service.dto.request.SignUpRequest;
+import com.emmanuel.user_service.dto.request.TokenRefreshRequest;
+import com.emmanuel.user_service.dto.response.JwtResponse;
+import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.exception.DuplicateResourceException;
 import com.emmanuel.user_service.exception.security.AuthenticationFailedException;
 import com.emmanuel.user_service.mapper.UserMapper;
@@ -13,6 +17,7 @@ import com.emmanuel.user_service.model.User;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.emmanuel.user_service.security.JwtTokenUtil;
 import com.emmanuel.user_service.utility.ErrorMessages;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,7 +56,8 @@ class AuthServiceImplTest {
     openMocks = org.mockito.MockitoAnnotations.openMocks(this);
 
     request =
-        new SignUpRequest("testuser", "test@email.com", "Password123!", "testuser", "testuser");
+        new SignUpRequest(
+            "testuser", "test@email.com", "Password123!", "testuser", "testuser", null);
 
     mappedUser = new User();
     mappedUser.setUsername("testuser");
@@ -80,7 +86,7 @@ class AuthServiceImplTest {
   }
 
   @Test
-  void createUser_whenValidRequest_ShouldCreateUser() {
+  void createUser_whenValidRequest_ShouldSignUp() throws IOException {
     when(userRepository.findByUsername(request.username())).thenReturn(java.util.Optional.empty());
     when(userRepository.findByEmail(request.email())).thenReturn(java.util.Optional.empty());
     when(userMapper.toEntity(request)).thenReturn(mappedUser);
@@ -88,14 +94,15 @@ class AuthServiceImplTest {
     when(userRepository.save(mappedUser)).thenReturn(savedUser);
     when(userMapper.toDto(savedUser))
         .thenReturn(
-            new CreateUserResponse(
+            new UserResponse(
                 savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getEmail(),
                 savedUser.getCreatedAt(),
-                savedUser.getUpdatedAt()));
+                savedUser.getUpdatedAt(),
+                savedUser.getLogoUrl()));
 
-    CreateUserResponse response = authService.createUser(request);
+    UserResponse response = authService.signUp(request);
 
     assertNotNull(response);
     assertEquals(savedUser.getId(), response.id());
@@ -114,12 +121,12 @@ class AuthServiceImplTest {
   }
 
   @Test
-  void createUser_whenUsernameExists_ShouldThrowDuplicateResourceException() {
+  void signUp_whenUsernameExists_ShouldThrowDuplicateResourceException() {
     when(userRepository.findByUsername(request.username()))
         .thenReturn(java.util.Optional.of(savedUser));
 
     Exception exception =
-        assertThrows(DuplicateResourceException.class, () -> authService.createUser(request));
+        assertThrows(DuplicateResourceException.class, () -> authService.signUp(request));
 
     String expectedMessage = ErrorMessages.USERNAME_ALREADY_EXISTS;
     String actualMessage = exception.getMessage();
@@ -128,12 +135,12 @@ class AuthServiceImplTest {
   }
 
   @Test
-  void createUser_whenEmailExists_ShouldThrowDuplicateResourceException() {
+  void signUp_whenEmailExists_ShouldThrowDuplicateResourceException() {
     when(userRepository.findByUsername(request.username())).thenReturn(java.util.Optional.empty());
     when(userRepository.findByEmail(request.email())).thenReturn(java.util.Optional.of(savedUser));
 
     Exception exception =
-        assertThrows(DuplicateResourceException.class, () -> authService.createUser(request));
+        assertThrows(DuplicateResourceException.class, () -> authService.signUp(request));
 
     String expectedMessage = ErrorMessages.EMAIL_ALREADY_EXISTS;
     String actualMessage = exception.getMessage();
@@ -147,7 +154,7 @@ class AuthServiceImplTest {
 
     Authentication authentication = mock(Authentication.class);
     when(authManager.authenticate(any())).thenReturn(authentication);
-    when(userRepository.findByUsernameForUpdate(loginRequest.username()))
+    when(userRepository.findByUsername(loginRequest.username()))
         .thenReturn(java.util.Optional.of(savedUser));
 
     when(jwtTokenUtil.generateToken(eq(savedUser.getUsername()), anySet(), anySet()))
@@ -194,19 +201,15 @@ class AuthServiceImplTest {
   @Test
   void refreshToken_whenValidToken_shouldReturnNewAccessToken() {
     String existingRefreshToken = "refreshToken";
-    TokenRefreshRequest refreshRequest = new TokenRefreshRequest(existingRefreshToken);
 
     savedUser.setRefreshTokens(new HashSet<>());
     savedUser.getRefreshTokens().add(existingRefreshToken);
     when(jwtTokenUtil.validateRefreshToken(existingRefreshToken)).thenReturn(true);
     when(jwtTokenUtil.getUsernameFromToken(existingRefreshToken))
         .thenReturn(savedUser.getUsername());
-    when(userRepository.findByUsernameForUpdate("testuser"))
-        .thenReturn(java.util.Optional.of(savedUser));
+    when(userRepository.findByUsername("testuser")).thenReturn(java.util.Optional.of(savedUser));
     when(jwtTokenUtil.generateToken(eq("testuser"), anySet(), anySet()))
         .thenReturn("newAccessToken");
-
-    JwtResponse refreshResponse = authService.refreshToken(refreshRequest);
   }
 
   @Test
@@ -230,8 +233,7 @@ class AuthServiceImplTest {
     when(jwtTokenUtil.validateRefreshToken(unrecognizedRefreshToken)).thenReturn(true);
     when(jwtTokenUtil.getUsernameFromToken(unrecognizedRefreshToken))
         .thenReturn(savedUser.getUsername());
-    when(userRepository.findByUsernameForUpdate("testuser"))
-        .thenReturn(java.util.Optional.of(savedUser));
+    when(userRepository.findByUsername("testuser")).thenReturn(java.util.Optional.of(savedUser));
 
     savedUser.setRefreshTokens(new HashSet<>());
     ResponseStatusException exception =

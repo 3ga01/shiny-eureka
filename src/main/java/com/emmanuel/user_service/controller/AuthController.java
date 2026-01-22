@@ -1,15 +1,21 @@
 package com.emmanuel.user_service.controller;
 
-import com.emmanuel.user_service.dto.*;
+import com.emmanuel.user_service.dto.request.LoginRequest;
+import com.emmanuel.user_service.dto.request.SignUpRequest;
+import com.emmanuel.user_service.dto.request.TokenRefreshRequest;
+import com.emmanuel.user_service.dto.response.JwtResponse;
+import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.service.AuthService;
+import com.emmanuel.user_service.utility.URI;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(URI.AUTH_BASE_URI)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -18,11 +24,12 @@ public class AuthController {
   @PostMapping("/signup")
   @RateLimiter(name = "userService")
   @ResponseStatus(HttpStatus.CREATED)
-  public CreateUserResponse signup(@RequestBody @Valid SignUpRequest request) {
-    return authService.createUser(request);
+  public UserResponse signup(@RequestBody @Valid SignUpRequest request) throws IOException {
+    return authService.signUp(request);
   }
 
   @PostMapping("/login")
+  @RateLimiter(name = "userService")
   public JwtResponse login(@RequestBody @Valid LoginRequest request) {
     return authService.login(request);
   }

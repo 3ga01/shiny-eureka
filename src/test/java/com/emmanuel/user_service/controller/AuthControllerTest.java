@@ -4,8 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.emmanuel.user_service.dto.LoginRequest;
-import com.emmanuel.user_service.dto.SignUpRequest;
+import com.emmanuel.user_service.dto.request.LoginRequest;
+import com.emmanuel.user_service.dto.request.SignUpRequest;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -45,7 +45,8 @@ class AuthControllerTest {
   void signup_shouldReturnCreatedUser() throws Exception {
 
     SignUpRequest request =
-        new SignUpRequest("testuser", "test@example.com", "Password1!", "John", "Doe");
+        new SignUpRequest(
+            "testuser", "test@example.com", "Password1!", "John", "Doe", "logoUrl.png");
 
     mockMvc
         .perform(
@@ -65,7 +66,7 @@ class AuthControllerTest {
 
     // First, create the user
     SignUpRequest signupRequest =
-        new SignUpRequest("loginuser", "login@example.com", "Password1!", "Alice", "Smith");
+        new SignUpRequest("loginuser", "login@example.com", "Password1!", "Alice", "Smith", null);
 
     mockMvc
         .perform(

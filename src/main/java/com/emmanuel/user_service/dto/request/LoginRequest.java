@@ -1,4 +1,4 @@
-package com.emmanuel.user_service.dto;
+package com.emmanuel.user_service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

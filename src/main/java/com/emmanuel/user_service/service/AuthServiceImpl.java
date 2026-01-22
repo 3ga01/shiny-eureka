@@ -1,23 +1,24 @@
 package com.emmanuel.user_service.service;
 
-import com.emmanuel.user_service.dto.*;
-import com.emmanuel.user_service.exception.DuplicateResourceException;
-import com.emmanuel.user_service.exception.security.AuthenticationFailedException;
+import com.emmanuel.user_service.dto.request.LoginRequest;
+import com.emmanuel.user_service.dto.request.SignUpRequest;
+import com.emmanuel.user_service.dto.request.TokenRefreshRequest;
+import com.emmanuel.user_service.dto.response.JwtResponse;
+import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.mapper.UserMapper;
 import com.emmanuel.user_service.model.Permission;
 import com.emmanuel.user_service.model.Role;
 import com.emmanuel.user_service.model.User;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.emmanuel.user_service.security.JwtTokenUtil;
-import com.emmanuel.user_service.utility.ErrorMessages;
+import com.emmanuel.user_service.service.storage.StorageService;
+import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,17 +32,11 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authManager;
   private final JwtTokenUtil jwtTokenUtil;
   private final UserMapper userMapper;
+  private final StorageService storageService;
 
   @Override
-  public CreateUserResponse createUser(SignUpRequest signUpRequest) {
-
-    if (userRepository.findByUsername(signUpRequest.username()).isPresent()) {
-      throw new DuplicateResourceException(ErrorMessages.USERNAME_ALREADY_EXISTS);
-    }
-
-    if (userRepository.findByEmail(signUpRequest.email()).isPresent()) {
-      throw new DuplicateResourceException(ErrorMessages.EMAIL_ALREADY_EXISTS);
-    }
+  @Transactional
+  public UserResponse signUp(SignUpRequest signUpRequest) throws IOException {
 
     User user = userMapper.toEntity(signUpRequest);
     user.setPassword(passwordEncoder.encode(signUpRequest.password()));
@@ -49,6 +44,15 @@ public class AuthServiceImpl implements AuthService {
     user.setRoles(Set.of(Role.ROLE_USER));
 
     user.setPermissions(Set.of(Permission.USER_READ));
+
+    if (signUpRequest.logoUrl() == null || signUpRequest.logoUrl().isEmpty()) {
+      String avatarUrl =
+          storageService.generateAndUploadAvatar(
+              signUpRequest.firstName(), signUpRequest.lastName());
+      user.setLogoUrl(avatarUrl);
+    } else {
+      user.setLogoUrl(signUpRequest.logoUrl());
+    }
 
     User saved = userRepository.save(user);
 
@@ -59,18 +63,10 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public JwtResponse login(LoginRequest loginRequest) {
 
-    try {
-      authManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginRequest.username(), loginRequest.password()));
-    } catch (BadCredentialsException | UsernameNotFoundException ex) {
-      throw new AuthenticationFailedException("Invalid username or password");
-    }
+    authManager.authenticate(
+        new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 
-    var user =
-        userRepository
-            .findByUsernameForUpdate(loginRequest.username())
-            .orElseThrow();
+    User user = userRepository.findByUsername(loginRequest.username()).orElseThrow();
 
     String accessToken =
         jwtTokenUtil.generateToken(
@@ -88,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public JwtResponse refreshToken( TokenRefreshRequest refreshToken) {
+  public JwtResponse refreshToken(TokenRefreshRequest refreshToken) {
     String requestToken = refreshToken.refreshToken();
 
     if (!jwtTokenUtil.validateRefreshToken(requestToken)) {
@@ -96,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     String username = jwtTokenUtil.getUsernameFromToken(requestToken);
-    User user = userRepository.findByUsernameForUpdate(username).orElseThrow();
+    User user = userRepository.findByUsername(username).orElseThrow();
 
     if (!user.getRefreshTokens().contains(requestToken)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Refresh token not recognized");

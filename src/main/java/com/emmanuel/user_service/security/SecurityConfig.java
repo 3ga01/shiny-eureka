@@ -2,6 +2,7 @@ package com.emmanuel.user_service.security;
 
 import com.emmanuel.user_service.exception.security.CustomAccessDeniedHandler;
 import com.emmanuel.user_service.exception.security.CustomAuthenticationEntryPoint;
+import com.emmanuel.user_service.utility.Roles;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,11 +35,11 @@ public class SecurityConfig {
                 auth.requestMatchers("/auth/**")
                     .permitAll()
                     .requestMatchers("/admin/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/user/**")
-                    .hasRole("USER")
+                    .hasRole(Roles.ADMIN)
+                    .requestMatchers("/users/**")
+                    .hasAnyRole(Roles.USER, Roles.ADMIN)
                     .requestMatchers("/customer/**")
-                    .hasRole("CUSTOMER")
+                    .hasAnyRole(Roles.CUSTOMER, Roles.ADMIN)
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(
