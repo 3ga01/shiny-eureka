@@ -8,8 +8,11 @@ pipeline {
 	stages {
 		stage('Checkout') {
 			steps {
-				git branch: 'master', url: 'https://github.com/3ga01/shiny-eureka'
-				credentialsId: 'test'
+				git(
+					branch: 'master',
+					url: 'https://github.com/3ga01/shiny-eureka',
+					credentialsId: 'test' // Jenkins credential ID
+				)
 			}
 		}
 
@@ -21,7 +24,12 @@ pipeline {
 
 		stage('Publish JaCoCo Report') {
 			steps {
-				jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java', exclusionPattern: '**/dto/**,**/config/**'
+				jacoco(
+					execPattern: '**/target/jacoco.exec',
+					classPattern: '**/target/classes',
+					sourcePattern: '**/src/main/java',
+					exclusionPattern: '**/dto/**,**/config/**'
+				)
 			}
 		}
 
