@@ -1,35 +1,19 @@
 pipeline {
-	agent any
+	agent {
+		docker {
+			image 'maven:3.9.6-eclipse-temurin-21'
+			args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/root/.m2'
+		}
+	}
 
 	environment {
 		MAVEN_OPTS = '-Xmx1024m'
 	}
 
 	stages {
-		stage('Checkout') {
-			steps {
-				git(
-					branch: 'master',
-					url: 'https://github.com/3ga01/shiny-eureka',
-					credentialsId: 'test' // Jenkins credential ID
-				)
-			}
-		}
-
 		stage('Build & Test') {
 			steps {
 				sh 'mvn clean verify'
-			}
-		}
-
-		stage('Publish JaCoCo Report') {
-			steps {
-				jacoco(
-					execPattern: '**/target/jacoco.exec',
-					classPattern: '**/target/classes',
-					sourcePattern: '**/src/main/java',
-					exclusionPattern: '**/dto/**,**/config/**'
-				)
 			}
 		}
 
@@ -42,8 +26,8 @@ pipeline {
 
 	post {
 		always {
+			junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 			archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
-			junit 'target/surefire-reports/*.xml'
 		}
 	}
 }
