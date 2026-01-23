@@ -1,9 +1,9 @@
 pipeline {
-	agent {
-		docker {
-			image 'maven:3.9.6-eclipse-temurin-21'
-			args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/root/.m2'
-		}
+	agent any
+
+	tools {
+		jdk 'jdk-21'
+		maven 'maven-3'
 	}
 
 	environment {
