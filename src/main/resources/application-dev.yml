@@ -3,7 +3,7 @@ server:
   tomcat:
     max-swallow-size: 500MB
     max-http-form-post-size: 500MB
-  connection-timeout: 120000ms  # 2 minutes for large uploads
+  connection-timeout: 120000ms
   servlet:
     multipart:
       max-file-size: 500MB
@@ -14,11 +14,13 @@ server:
 spring:
   application:
     name: user-service
+
   datasource:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -27,22 +29,53 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
+
   servlet:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
       enabled: true
+
   mvc:
     servlet:
       path: ${BASE_PATH:/api}
+
   flyway:
     enabled: true
     baseline-on-migrate: true
 
+# ===============================
+# Actuator + Prometheus (NEW)
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: when_authorized
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.75,0.95,0.99
+    tags:
+      application: ${spring.application.name}
+
+# ===============================
+# Sentry
+# ===============================
 sentry:
   dsn: ${SENTRY_DSN}
   tracesSampleRate: 1.0
 
+# ===============================
+# Resilience4j
+# ===============================
 resilience4j:
   ratelimiter:
     instances:
@@ -51,11 +84,17 @@ resilience4j:
         limitRefreshPeriod: 1s
         timeoutDuration: 500ms
 
+# ===============================
+# JWT
+# ===============================
 jwt:
   private-key-path: ${JWT_PRIVATE_KEY}
   public-key-path: ${JWT_PUBLIC_KEY}
   expiration-ms: 3600000
 
+# ===============================
+# MinIO / S3
+# ===============================
 cloud:
   aws:
     credentials:
