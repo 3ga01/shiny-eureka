@@ -3,6 +3,7 @@ package com.emmanuel.user_service.controller;
 import com.emmanuel.user_service.dto.filter.UserFilter;
 import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.service.user.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
   private final UserService userService;
 

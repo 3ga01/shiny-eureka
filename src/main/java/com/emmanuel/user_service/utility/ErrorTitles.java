@@ -34,4 +34,5 @@ public class ErrorTitles {
   public static final String DUPLICATE_RESOURCE = "Duplicate Resource";
   public static final String ACCOUNT_LOCKED = "Account Locked";
   public static final String AUTH_FAILED = "Authentication Failed";
+  public static final String ACCOUNT_DISABLED = "Account Disabled";
 }

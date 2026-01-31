@@ -4,7 +4,7 @@ import com.emmanuel.user_service.dto.filter.UserFilter;
 import com.emmanuel.user_service.dto.request.UpdateUserRequest;
 import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.mapper.UserMapper;
-import com.emmanuel.user_service.model.User;
+import com.emmanuel.user_service.model.user.User;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.emmanuel.user_service.specification.UserSpecifications;
 import com.emmanuel.user_service.utility.ErrorMessages;

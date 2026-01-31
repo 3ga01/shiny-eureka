@@ -8,6 +8,7 @@ import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.service.AuthService;
 import com.emmanuel.user_service.utility.URI;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,8 @@ public class AuthController {
   @PostMapping("/signup")
   @RateLimiter(name = "userService")
   @ResponseStatus(HttpStatus.CREATED)
-  public UserResponse signup(@RequestBody @Valid SignUpRequest request) throws IOException {
+  public UserResponse signup(@RequestBody @Valid SignUpRequest request)
+      throws IOException, MessagingException {
     return authService.signUp(request);
   }
 
@@ -38,5 +40,10 @@ public class AuthController {
   @RateLimiter(name = "userService")
   public JwtResponse refresh(@RequestBody @Valid TokenRefreshRequest request) {
     return authService.refreshToken(request);
+  }
+
+  @PostMapping("/activate")
+  public UserResponse activateUserAccount(@RequestParam String token) {
+    return authService.activateUserAccount(token);
   }
 }

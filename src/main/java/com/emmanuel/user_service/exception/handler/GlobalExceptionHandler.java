@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -155,6 +156,19 @@ public class GlobalExceptionHandler {
     problemDetail.setTitle(ErrorTitles.ACCOUNT_LOCKED);
     problemDetail.setDetail(ErrorMessages.ACCOUNT_LOCKED);
     problemDetail.setType(URI.create("https://example.com/problems/account-locked"));
+
+    return problemDetail;
+  }
+
+  @ExceptionHandler(DisabledException.class)
+  public ProblemDetail handleDisabledException(DisabledException ex) {
+    log.warn("{}: {}", ErrorTitles.ACCOUNT_DISABLED, ex.getMessage());
+    Sentry.captureException(ex);
+
+    ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+    problemDetail.setTitle(ErrorTitles.ACCOUNT_DISABLED);
+    problemDetail.setDetail(ErrorMessages.ACCOUNT_DISABLED);
+    problemDetail.setType(URI.create("https://example.com/problems/account-disabled"));
 
     return problemDetail;
   }

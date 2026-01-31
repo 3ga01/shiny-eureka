@@ -73,7 +73,7 @@ public class StorageServiceImpl implements StorageService {
   @Override
   public byte[] generateAvatar(String firstName, String lastName, int size) throws IOException {
     String initials = getInitials(firstName, lastName);
-    Color bgColor = getColorForName(firstName + lastName);
+    Color bgColor = getColorForName();
 
     BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
     Graphics2D g2d = image.createGraphics();
@@ -119,7 +119,6 @@ public class StorageServiceImpl implements StorageService {
 
     // Create a MultipartFile-like structure or upload directly
     String fileName = "avatar-" + UUID.randomUUID() + ".png";
-    String key = "avatars/" + fileName;
 
     // Upload to S3
     return uploadAvatar(avatarBytes, fileName);
@@ -138,7 +137,7 @@ public class StorageServiceImpl implements StorageService {
     return firstInitial + lastInitial;
   }
 
-  private Color getColorForName(String name) {
+  private Color getColorForName() {
     return PASTEL_COLORS.getRandomColor();
   }
 }

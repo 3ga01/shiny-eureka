@@ -3,14 +3,14 @@ package com.emmanuel.user_service.mapper;
 import com.emmanuel.user_service.dto.request.SignUpRequest;
 import com.emmanuel.user_service.dto.request.UpdateUserRequest;
 import com.emmanuel.user_service.dto.response.UserResponse;
-import com.emmanuel.user_service.model.User;
+import com.emmanuel.user_service.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-  @Mapping(target = "enabled", constant = "true")
+  @Mapping(target = "enabled", constant = "false")
   @Mapping(target = "accountNonExpired", constant = "true")
   @Mapping(target = "accountNonLocked", constant = "true")
   @Mapping(target = "credentialsNonExpired", constant = "true")

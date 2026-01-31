@@ -1,4 +1,4 @@
-package com.emmanuel.user_service.model;
+package com.emmanuel.user_service.model.user;
 
 public enum Permission {
     USER_CREATE,

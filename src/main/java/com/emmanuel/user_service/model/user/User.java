@@ -1,4 +1,4 @@
-package com.emmanuel.user_service.model;
+package com.emmanuel.user_service.model.user;
 
 import jakarta.persistence.*;
 import java.time.Instant;

@@ -33,7 +33,11 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
-                        "/auth/**", " /swagger-ui/**", "/v3/api-docs/**", "/actuator/**")
+                        "/auth/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/actuator/**",
+                        "/swagger-ui.html")
                     .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole(Roles.ADMIN)

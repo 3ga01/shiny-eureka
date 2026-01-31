@@ -1,6 +1,6 @@
 package com.emmanuel.user_service.repository;
 
-import com.emmanuel.user_service.model.User;
+import com.emmanuel.user_service.model.user.User;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

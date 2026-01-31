@@ -11,7 +11,7 @@ public record SignUpRequest(
         String username,
     @NotBlank(message = "Email is required") @Email(message = "Email must be valid") String email,
     @NotBlank(message = "Password is required")
-        @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+        @Size(min = 8, max = 72, message = "Password must be between 8 and 72 characters")
         @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
             message =

@@ -9,12 +9,13 @@ import com.emmanuel.user_service.dto.request.TokenRefreshRequest;
 import com.emmanuel.user_service.dto.response.JwtResponse;
 import com.emmanuel.user_service.dto.response.UserResponse;
 import com.emmanuel.user_service.mapper.UserMapper;
-import com.emmanuel.user_service.model.Permission;
-import com.emmanuel.user_service.model.Role;
-import com.emmanuel.user_service.model.User;
+import com.emmanuel.user_service.model.user.Permission;
+import com.emmanuel.user_service.model.user.Role;
+import com.emmanuel.user_service.model.user.User;
 import com.emmanuel.user_service.repository.UserRepository;
 import com.emmanuel.user_service.security.JwtTokenUtil;
 import com.emmanuel.user_service.service.storage.StorageService;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
@@ -91,7 +92,7 @@ class AuthServiceImplTest {
   }
 
   @Test
-  void createUser_whenValidRequest_ShouldSignUp() throws IOException {
+  void createUser_whenValidRequest_ShouldSignUp() throws IOException, MessagingException {
     when(userRepository.findByUsername(request.username())).thenReturn(java.util.Optional.empty());
     when(userRepository.findByEmail(request.email())).thenReturn(java.util.Optional.empty());
     when(userMapper.toEntity(request)).thenReturn(mappedUser);

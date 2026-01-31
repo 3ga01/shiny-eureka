@@ -46,4 +46,5 @@ public class ErrorMessages {
   public static final String INVALID_ZIP_CODE = "";
   public static final String INVALID_FIELDS = "Missing required fields or invalid values.";
   public static final String ACCOUNT_LOCKED = "Your account is locked. Please contact support.";
+  public static final String ACCOUNT_DISABLED = "Your account is disabled. Please contact support.";
 }

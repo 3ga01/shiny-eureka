@@ -2,6 +2,7 @@ package com.emmanuel.user_service.controller;
 
 import com.emmanuel.user_service.service.storage.StorageService;
 import com.emmanuel.user_service.utility.URI;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping(URI.FILE_BASE_URI)
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class FileUploadController {
 
   private final StorageService storageService;

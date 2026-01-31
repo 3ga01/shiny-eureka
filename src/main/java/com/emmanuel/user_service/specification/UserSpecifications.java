@@ -1,8 +1,8 @@
 package com.emmanuel.user_service.specification;
 
 import com.emmanuel.user_service.dto.filter.UserFilter;
-import com.emmanuel.user_service.model.Role;
-import com.emmanuel.user_service.model.User;
+import com.emmanuel.user_service.model.user.Role;
+import com.emmanuel.user_service.model.user.User;
 import jakarta.persistence.criteria.SetJoin;
 import java.util.Set;
 import org.springframework.data.jpa.domain.Specification;
